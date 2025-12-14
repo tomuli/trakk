@@ -8,25 +8,38 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { createServerFn } from '@tanstack/react-start'
+import { APIError } from 'better-auth'
 import * as React from 'react'
 import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary.js'
 import { NotFound } from '~/components/NotFound.js'
+import { auth } from '~/server/auth.js'
 import appCss from '~/styles/app.css?url'
 import { seo } from '~/utils/seo.js'
-import { useAppSession } from '~/utils/session.js'
 
-const fetchUser = createServerFn({ method: 'GET' }).handler(async () => {
-  // We need to auth on the server so we have access to secure cookies
-  const session = await useAppSession()
+const fetchUser = createServerFn({ method: 'GET' }).handler(
+  async ({ request }) => {
+    try {
+      const session = await auth.api.getSession({
+        headers: request.headers,
+      })
 
-  if (!session.data.userEmail) {
-    return null
-  }
+      if (!session?.user) {
+        return null
+      }
 
-  return {
-    email: session.data.userEmail,
-  }
-})
+      return {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+      }
+    } catch (error) {
+      if (error instanceof APIError) {
+        return null
+      }
+      throw error
+    }
+  },
+)
 
 export const Route = createRootRoute({
   beforeLoad: async () => {

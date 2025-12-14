@@ -38,31 +38,29 @@ export function Login() {
         })
       }}
       afterSubmit={
-        loginMutation.data ? (
+        loginMutation.data?.error ? (
           <>
             <div className="text-red-400">{loginMutation.data.message}</div>
-            {loginMutation.data.userNotFound ? (
-              <div>
-                <button
-                  className="text-blue-500"
-                  onClick={(e) => {
-                    const formData = new FormData(
-                      (e.target as HTMLButtonElement).form!,
-                    )
+            <div>
+              <button
+                className="text-blue-500"
+                onClick={(e) => {
+                  const formData = new FormData(
+                    (e.target as HTMLButtonElement).form!,
+                  )
 
-                    signupMutation.mutate({
-                      data: {
-                        email: formData.get('email') as string,
-                        password: formData.get('password') as string,
-                      },
-                    })
-                  }}
-                  type="button"
-                >
-                  Sign up instead?
-                </button>
-              </div>
-            ) : null}
+                  signupMutation.mutate({
+                    data: {
+                      email: formData.get('email') as string,
+                      password: formData.get('password') as string,
+                    },
+                  })
+                }}
+                type="button"
+              >
+                Sign up instead?
+              </button>
+            </div>
           </>
         ) : null
       }
